@@ -19,35 +19,6 @@ export const App: React.FC = () => {
   const [showStickyBar, setShowStickyBar] = useState<boolean>(false);
 
   useEffect(() => {
-    // Auto-sync any user uploaded assets stored in browser localStorage to the backend server
-    const assetKeys = [
-      { id: "hero-tablet", file: "maxtab-flatlay.jpg", aliases: ["hero-tablet.jpg", "WhatsApp Image 2026-09-10 at 9.24.05 PM (1).jpeg"] },
-      { id: "colors-stack", file: "maxtab-colors.jpg", aliases: ["colors-stack.jpg", "WhatsApp Image 2026-09-10 at 9.24.05 PM.jpeg"] },
-      { id: "retail-box", file: "maxtab-box.jpg", aliases: ["retail-box.jpg", "WhatsApp Image 2026-09-10 at 9.24.03 PM.jpeg"] },
-      { id: "gift-box", file: "maxtab-giftbox.jpg", aliases: ["gift-box.jpg", "WhatsApp Image 2026-09-10 at 9.24.02 PM (1).jpeg"] },
-    ];
-
-    for (const item of assetKeys) {
-      try {
-        const saved = localStorage.getItem(`maxtab_asset_${item.id}`);
-        if (saved && saved.startsWith("data:image")) {
-          fetch("/api/upload-asset", {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({
-              filename: item.file,
-              base64Data: saved,
-              aliasNames: item.aliases,
-            }),
-          }).catch(() => {});
-        }
-      } catch {
-        // ignore
-      }
-    }
-  }, []);
-
-  useEffect(() => {
     const handleScroll = () => {
       // Show sticky bar after scrolling past 500px
       if (window.scrollY > 500) {

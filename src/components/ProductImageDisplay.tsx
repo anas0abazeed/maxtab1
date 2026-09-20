@@ -1,6 +1,6 @@
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 import { Image as ImageIcon } from "lucide-react";
-import { getSavedAsset, DEFAULT_PRODUCT_IMAGES } from "../utils/assetManager";
+import { DEFAULT_PRODUCT_IMAGES } from "../utils/assetManager";
 
 interface ProductImageDisplayProps {
   imageId:
@@ -27,53 +27,17 @@ export const ProductImageDisplay: React.FC<ProductImageDisplayProps> = ({
     DEFAULT_PRODUCT_IMAGES.find((img) => img.id === imageId) ||
     DEFAULT_PRODUCT_IMAGES[0];
 
-  const savedLocal = getSavedAsset(imageId);
-
+  // Static production candidate sources (assets & images directories)
   const candidateSources = [
     defaultInfo.src,
-    ...(savedLocal ? [savedLocal] : []),
+    defaultInfo.src.replace(/^\/assets\//, "/images/"),
     ...(defaultInfo.alternativeSources || []),
   ];
 
   const [sourceIndex, setSourceIndex] = useState<number>(0);
-  const [currentSrc, setCurrentSrc] = useState<string>(
-    savedLocal || defaultInfo.src
-  );
+  const [currentSrc, setCurrentSrc] = useState<string>(defaultInfo.src);
   const [hasError, setHasError] = useState<boolean>(false);
   const [isLoading, setIsLoading] = useState<boolean>(true);
-
-  useEffect(() => {
-    const saved = getSavedAsset(imageId);
-    if (saved && saved.startsWith("data:image")) {
-      setCurrentSrc(saved);
-      setHasError(false);
-      setIsLoading(false);
-
-      // Silently sync to backend to ensure file exists on server disk
-      const aliasNames: string[] = [];
-      if (defaultInfo.originalUploadName) {
-        aliasNames.push(defaultInfo.originalUploadName);
-      }
-      if (defaultInfo.src) {
-        aliasNames.push(defaultInfo.src.replace(/^\/(assets|images)\//, ""));
-      }
-
-      fetch("/api/upload-asset", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          filename: `${imageId}.jpg`,
-          base64Data: saved,
-          aliasNames,
-        }),
-      }).catch(() => {});
-    } else {
-      setSourceIndex(0);
-      setCurrentSrc(defaultInfo.src);
-      setHasError(false);
-      setIsLoading(true);
-    }
-  }, [imageId, defaultInfo]);
 
   const handleImageError = () => {
     const nextIndex = sourceIndex + 1;
@@ -81,7 +45,6 @@ export const ProductImageDisplay: React.FC<ProductImageDisplayProps> = ({
       setSourceIndex(nextIndex);
       setCurrentSrc(candidateSources[nextIndex]);
     } else {
-      // If all candidates failed, display the fixed static card
       setHasError(true);
       setIsLoading(false);
     }

@@ -100,64 +100,37 @@ export function saveLocalAsset(id: string, dataUrl: string): void {
 
 // Color asset helper respecting:
 // - Orange = use the actual uploaded orange product image.
-// - Gray = use an actual uploaded gray product image only if provided.
-// - Black = use an actual uploaded black product image only if provided.
+// - Gray = use the authentic 3-colors stack photo (shows gray).
+// - Black = use the authentic 3-colors stack photo (shows black).
 // - Never recolor the orange image to create gray or black.
 export function getColorImageInfo(color: "برتقالي" | "سكني" | "أسود") {
   if (color === "برتقالي") {
-    const saved = getSavedAsset("hero-tablet") || getSavedAsset("color-orange");
     return {
       imageId: "hero-tablet" as const,
       colorName: "برتقالي",
-      customSrc: saved,
+      customSrc: null,
       badgeText: "اللون البرتقالي البرونزي المعتمد (اللون الأساسي)",
       description: "الصورة الحقيقية المعتمدة للجهاز باللون البرتقالي مع كامل الملحقات.",
       isAuthenticColorPhoto: true,
     };
   }
 
-  // For Gray: check if user explicitly uploaded an individual gray photo
   if (color === "سكني") {
-    const savedGray = getSavedAsset("color-gray");
-    if (savedGray) {
-      return {
-        imageId: "color-gray" as any,
-        colorName: "سكني",
-        customSrc: savedGray,
-        badgeText: "اللون السكني الكلاسيكي المعتمد",
-        description: "الصورة الحقيقية لجهاز MAXTAB باللون السكني الكلاسيكي.",
-        isAuthenticColorPhoto: true,
-      };
-    }
-    // Otherwise show the authentic 3-colors stack (never recolor orange)
     return {
       imageId: "colors-stack" as const,
       colorName: "سكني",
-      customSrc: getSavedAsset("colors-stack"),
+      customSrc: null,
       badgeText: "صورة الألوان الثلاثة الأصلية (يتوفر باللون السكني)",
       description: "صورة واقعية تعرض الألوان الثلاثة الأصلية دون أي تعديل رقمي على لون الجهاز.",
       isAuthenticColorPhoto: true,
     };
   }
 
-  // For Black: check if user explicitly uploaded an individual black photo
   if (color === "أسود") {
-    const savedBlack = getSavedAsset("color-black");
-    if (savedBlack) {
-      return {
-        imageId: "color-black" as any,
-        colorName: "أسود",
-        customSrc: savedBlack,
-        badgeText: "اللون الأسود الفاخر المعتمد",
-        description: "الصورة الحقيقية لجهاز MAXTAB باللون الأسود الملكي.",
-        isAuthenticColorPhoto: true,
-      };
-    }
-    // Otherwise show the authentic 3-colors stack (never recolor orange)
     return {
       imageId: "colors-stack" as const,
       colorName: "أسود",
-      customSrc: getSavedAsset("colors-stack"),
+      customSrc: null,
       badgeText: "صورة الألوان الثلاثة الأصلية (يتوفر باللون الأسود)",
       description: "صورة واقعية تعرض الألوان الثلاثة الأصلية دون أي تعديل رقمي على لون الجهاز.",
       isAuthenticColorPhoto: true,

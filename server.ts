@@ -168,21 +168,18 @@ app.post("/api/upload-asset", (req: Request, res: Response) => {
       allNames.add("maxtab-flatlay.jpg");
       allNames.add("hero-tablet.jpg");
       allNames.add("WhatsApp Image 2026-09-10 at 9.24.05 PM (1).jpeg");
-    }
-    if (safeFilename.includes("colors") || safeFilename.includes("stack")) {
+    } else if (safeFilename.includes("colors") || safeFilename.includes("stack")) {
       allNames.add("maxtab-colors.jpg");
       allNames.add("colors-stack.jpg");
       allNames.add("WhatsApp Image 2026-09-10 at 9.24.05 PM.jpeg");
-    }
-    if (safeFilename.includes("retail-box") || safeFilename.includes("box")) {
-      allNames.add("maxtab-box.jpg");
-      allNames.add("retail-box.jpg");
-      allNames.add("WhatsApp Image 2026-09-10 at 9.24.03 PM.jpeg");
-    }
-    if (safeFilename.includes("gift-box") || safeFilename.includes("giftbox")) {
+    } else if (safeFilename.includes("gift-box") || safeFilename.includes("giftbox")) {
       allNames.add("maxtab-giftbox.jpg");
       allNames.add("gift-box.jpg");
       allNames.add("WhatsApp Image 2026-09-10 at 9.24.02 PM (1).jpeg");
+    } else if (safeFilename.includes("retail-box") || safeFilename.includes("maxtab-box") || safeFilename === "maxtab-box.jpg") {
+      allNames.add("maxtab-box.jpg");
+      allNames.add("retail-box.jpg");
+      allNames.add("WhatsApp Image 2026-09-10 at 9.24.03 PM.jpeg");
     }
 
     for (const dir of targetDirs) {
@@ -225,7 +222,7 @@ app.use(express.static(path.join(process.cwd(), "public")));
 async function startServer() {
   if (process.env.NODE_ENV !== "production") {
     const vite = await createViteServer({
-      server: { middlewareMode: true },
+      server: { middlewareMode: true, hmr: false },
       appType: "spa",
     });
     app.use(vite.middlewares);
