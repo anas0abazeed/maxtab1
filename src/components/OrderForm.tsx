@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useRef } from "react";
 import { CheckCircle2, AlertCircle, ShoppingBag, Plus, Minus, Send, Phone, User, MapPin } from "lucide-react";
 import { PRODUCT_PRICE, PRODUCT_CURRENCY, JORDAN_GOVERNORATES } from "../data/productData";
 import { OrderFormData, Order } from "../types";
@@ -18,6 +18,7 @@ export const OrderForm: React.FC = () => {
   const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
   const [submittedOrder, setSubmittedOrder] = useState<Order | null>(null);
+  const submitErrorRef = useRef<HTMLDivElement | null>(null);
 
   const colors = [
     {
@@ -55,19 +56,50 @@ export const OrderForm: React.FC = () => {
     e.preventDefault();
     setErrorMsg(null);
 
-    // Validation for adults 35-55
-    if (!formData.customerName.trim() || formData.customerName.trim().length < 3) {
-      setErrorMsg("يرجى كتابة الاسم الكامل (ثلاثي أو رباعي) لتسهيل تسليم الطلب.");
+    // 1. Validate customer name
+    const cleanName = formData.customerName.trim();
+    if (!cleanName || cleanName.length < 2) {
+      const msg = "يرجى كتابة الاسم الكامل (الاسم واللقب على الأقل) لتسليم الطلب.";
+      setErrorMsg(msg);
+      console.warn("[OrderForm Validation Failed] Invalid name:", cleanName);
+      setTimeout(() => {
+        submitErrorRef.current?.scrollIntoView({ behavior: "smooth", block: "center" });
+      }, 50);
       return;
     }
 
-    const cleanPhone = formData.phone.trim();
-    if (!cleanPhone || cleanPhone.length < 9) {
-      setErrorMsg("يرجى إدخال رقم هاتف فعال داخل الأردن للتواصل معك والتأكيد (مثال: 07XXXXXXXX).");
+    // 2. Validate phone number (allow optional spaces, dashes, or +962)
+    const rawPhone = formData.phone.trim();
+    const cleanPhone = rawPhone.replace(/[\s\-()]/g, "");
+    if (!cleanPhone || cleanPhone.length < 8) {
+      const msg = "يرجى إدخال رقم هاتف فعال داخل الأردن للتواصل معك والتأكيد (مثال: 07XXXXXXXX).";
+      setErrorMsg(msg);
+      console.warn("[OrderForm Validation Failed] Invalid phone:", rawPhone);
+      setTimeout(() => {
+        submitErrorRef.current?.scrollIntoView({ behavior: "smooth", block: "center" });
+      }, 50);
+      return;
+    }
+
+    // 3. Validate governorate
+    if (!formData.governorate) {
+      const msg = "يرجى تحديد المحافظة لتسهيل التوصيل.";
+      setErrorMsg(msg);
       return;
     }
 
     setIsSubmitting(true);
+
+    const orderData = {
+      customerName: cleanName,
+      phone: cleanPhone,
+      governorate: formData.governorate,
+      quantity: formData.quantity,
+      selectedColor: formData.selectedColor,
+      notes: formData.notes ? formData.notes.trim() : "",
+    };
+
+    console.log("[OrderForm] Submitting order payload to /api/order:", orderData);
 
     try {
       const response = await fetch("/api/order", {
@@ -75,31 +107,57 @@ export const OrderForm: React.FC = () => {
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify({
-          customerName: formData.customerName.trim(),
-          phone: cleanPhone,
-          governorate: formData.governorate,
-          quantity: formData.quantity,
-          selectedColor: formData.selectedColor,
-          notes: formData.notes,
-        }),
+        body: JSON.stringify(orderData),
       });
 
       let data: any = null;
+      const rawText = await response.text();
       try {
-        data = await response.json();
-      } catch {
-        // Response was not JSON
+        data = JSON.parse(rawText);
+      } catch (parseErr) {
+        console.error("[OrderForm] Failed to parse response as JSON:", rawText, parseErr);
       }
 
       if (!response.ok || !data?.success) {
-        throw new Error(data?.error || `حدث خطأ أثناء إرسال الطلب (${response.status}). يرجى المحاولة مرة أخرى.`);
+        const errorMessage =
+          data?.error ||
+          `حدث خطأ أثناء إرسال الطلب (${response.status}). يرجى المحاولة مرة أخرى.`;
+        console.error("[OrderForm HTTP Failure]", {
+          status: response.status,
+          statusText: response.statusText,
+          data,
+          rawResponse: rawText,
+        });
+        throw new Error(errorMessage);
       }
 
+      console.log("[OrderForm Success] Received order confirmation:", data);
+
+      // Reset form fields back to normal clean state
+      setFormData({
+        customerName: "",
+        phone: "",
+        governorate: JORDAN_GOVERNORATES[0],
+        quantity: 1,
+        selectedColor: "برتقالي",
+        notes: "",
+      });
+      setErrorMsg(null);
       setSubmittedOrder(data.order);
+
+      // Scroll to order confirmation section
+      const section = document.getElementById("order-form");
+      if (section) {
+        section.scrollIntoView({ behavior: "smooth", block: "start" });
+      }
     } catch (err: any) {
-      console.error("Order error:", err);
-      setErrorMsg(err.message || "حدث خطأ أثناء إرسال الطلب. يرجى المحاولة مرة أخرى.");
+      console.error("[OrderForm Submission Exception]", err);
+      const displayMsg =
+        err?.message || "حدث خطأ أثناء إرسال الطلب. يرجى المحاولة مرة أخرى.";
+      setErrorMsg(displayMsg);
+      setTimeout(() => {
+        submitErrorRef.current?.scrollIntoView({ behavior: "smooth", block: "center" });
+      }, 50);
     } finally {
       setIsSubmitting(false);
     }
@@ -431,6 +489,23 @@ export const OrderForm: React.FC = () => {
                   </span>
                 </div>
               </div>
+
+              {/* Error Notice Directly Above Submit Button */}
+              {errorMsg && (
+                <div
+                  ref={submitErrorRef}
+                  className="p-4 rounded-xl bg-[#FFF1F0] border-2 border-[#FFCCC7] flex items-start gap-3 text-red-800 text-sm font-medium animate-fade-in"
+                  role="alert"
+                >
+                  <AlertCircle className="w-5 h-5 text-red-600 shrink-0 mt-0.5" />
+                  <div className="flex-1 text-right">
+                    <p className="font-bold text-red-900">{errorMsg}</p>
+                    <p className="text-xs text-red-700 mt-1">
+                      يرجى مراجعة البيانات المدخلة والمحاولة مرة أخرى.
+                    </p>
+                  </div>
+                </div>
+              )}
 
               {/* Submit CTA Button */}
               <button
