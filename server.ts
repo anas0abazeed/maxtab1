@@ -77,6 +77,51 @@ app.post("/api/orders", async (req: Request, res: Response) => {
   await handleOrderSubmission(req, res, onOrderSuccess);
 });
 
+// Persistent asset storage helper
+const ASSET_STORE_FILE = path.join(process.cwd(), "data", "assets_store.json");
+
+function restoreStoredAssets() {
+  try {
+    if (!fs.existsSync(ASSET_STORE_FILE)) return;
+    const raw = fs.readFileSync(ASSET_STORE_FILE, "utf-8");
+    const store = JSON.parse(raw);
+    if (!store || typeof store !== "object") return;
+
+    const targetDirs = [
+      path.join(process.cwd(), "public", "assets"),
+      path.join(process.cwd(), "public", "images"),
+      path.join(process.cwd(), "dist", "assets"),
+      path.join(process.cwd(), "dist", "images"),
+    ];
+
+    for (const dir of targetDirs) {
+      if (!fs.existsSync(dir)) {
+        fs.mkdirSync(dir, { recursive: true });
+      }
+    }
+
+    for (const [filename, base64Data] of Object.entries(store)) {
+      if (typeof base64Data === "string") {
+        const matches = base64Data.match(/^data:([A-Za-z-+/]+);base64,(.+)$/);
+        const buffer = matches ? Buffer.from(matches[2], "base64") : Buffer.from(base64Data, "base64");
+        for (const dir of targetDirs) {
+          try {
+            fs.writeFileSync(path.join(dir, filename), buffer);
+          } catch (e) {
+            // ignore
+          }
+        }
+      }
+    }
+    console.log("[Asset Restore] Restored assets from persistent storage");
+  } catch (err) {
+    console.warn("[Asset Restore] Could not restore assets", err);
+  }
+}
+
+// Restore on boot
+restoreStoredAssets();
+
 // Image upload helper to allow saving real uploaded photos to both /public/assets/ and /public/images/
 app.post("/api/upload-asset", (req: Request, res: Response) => {
   try {
@@ -118,6 +163,28 @@ app.post("/api/upload-asset", (req: Request, res: Response) => {
       }
     }
 
+    // Auto add known aliases
+    if (safeFilename.includes("hero-tablet") || safeFilename.includes("flatlay")) {
+      allNames.add("maxtab-flatlay.jpg");
+      allNames.add("hero-tablet.jpg");
+      allNames.add("WhatsApp Image 2026-09-10 at 9.24.05 PM (1).jpeg");
+    }
+    if (safeFilename.includes("colors") || safeFilename.includes("stack")) {
+      allNames.add("maxtab-colors.jpg");
+      allNames.add("colors-stack.jpg");
+      allNames.add("WhatsApp Image 2026-09-10 at 9.24.05 PM.jpeg");
+    }
+    if (safeFilename.includes("retail-box") || safeFilename.includes("box")) {
+      allNames.add("maxtab-box.jpg");
+      allNames.add("retail-box.jpg");
+      allNames.add("WhatsApp Image 2026-09-10 at 9.24.03 PM.jpeg");
+    }
+    if (safeFilename.includes("gift-box") || safeFilename.includes("giftbox")) {
+      allNames.add("maxtab-giftbox.jpg");
+      allNames.add("gift-box.jpg");
+      allNames.add("WhatsApp Image 2026-09-10 at 9.24.02 PM (1).jpeg");
+    }
+
     for (const dir of targetDirs) {
       if (fs.existsSync(dir)) {
         for (const name of allNames) {
@@ -130,7 +197,21 @@ app.post("/api/upload-asset", (req: Request, res: Response) => {
       }
     }
 
-    console.log(`[Asset Saved] Saved ${safeFilename} to assets and images directories`);
+    // Save to persistent file
+    try {
+      let store: Record<string, string> = {};
+      if (fs.existsSync(ASSET_STORE_FILE)) {
+        store = JSON.parse(fs.readFileSync(ASSET_STORE_FILE, "utf-8") || "{}");
+      }
+      for (const name of allNames) {
+        store[name] = base64Data;
+      }
+      fs.writeFileSync(ASSET_STORE_FILE, JSON.stringify(store, null, 2));
+    } catch (e) {
+      console.warn("Could not save to ASSET_STORE_FILE", e);
+    }
+
+    console.log(`[Asset Saved] Saved ${safeFilename} (${Array.from(allNames).join(", ")})`);
     res.json({ success: true, url: `/assets/${safeFilename}` });
   } catch (err: any) {
     console.error("Upload error:", err);
