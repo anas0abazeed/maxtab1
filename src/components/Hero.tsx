@@ -95,8 +95,10 @@ export const Hero: React.FC = () => {
           <div className="lg:col-span-5 flex flex-col items-center">
             <div className="w-full max-w-md lg:max-w-none">
               <ProductImageDisplay
-                imageId="hero-tablet"
-                aspectRatio="aspect-4/3 sm:aspect-square"
+                imageId="retail-box"
+                src="/assets/maxtab-box.jpg"
+                alt="غلاف كرتونة تابلت MAXTAB Ultimate 70 Pro 5G الرسمي"
+                aspectRatio="aspect-square"
                 className="shadow-sm border-2 border-[#E5DFC8]"
               />
 

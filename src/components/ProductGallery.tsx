@@ -45,6 +45,7 @@ export const ProductGallery: React.FC = () => {
             {/* Active image display container */}
             <div className="relative aspect-4/3 sm:aspect-16/10 w-full rounded-xl overflow-hidden bg-[#F4F2ED]">
               <ProductImageDisplay
+                key={activeImage.id}
                 imageId={activeImage.id as any}
                 className="w-full h-full"
                 aspectRatio="aspect-full"
@@ -149,6 +150,7 @@ export const ProductGallery: React.FC = () => {
 
             <div className="w-full h-[75vh] flex items-center justify-center bg-[#111315] rounded-2xl overflow-hidden border border-[#333]">
               <ProductImageDisplay
+                key={`modal-${activeImage.id}`}
                 imageId={activeImage.id as any}
                 className="w-full h-full"
                 aspectRatio="aspect-full"

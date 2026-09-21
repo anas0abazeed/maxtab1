@@ -312,6 +312,7 @@ export const OrderForm: React.FC = () => {
                     <div className="p-3 sm:p-4 rounded-xl bg-[#FFFFFF] border border-[#E5DFC8] flex flex-col sm:flex-row items-center gap-4">
                       <div className="w-24 h-24 sm:w-28 sm:h-28 shrink-0 rounded-lg overflow-hidden bg-[#F0EEEA] border border-[#E2DDD0]">
                         <ProductImageDisplay
+                          key={colorInfo.imageId}
                           imageId={colorInfo.imageId}
                           className="w-full h-full"
                           aspectRatio="aspect-square"

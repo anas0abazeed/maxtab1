@@ -1,9 +1,9 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Image as ImageIcon } from "lucide-react";
 import { DEFAULT_PRODUCT_IMAGES } from "../utils/assetManager";
 
 interface ProductImageDisplayProps {
-  imageId:
+  imageId?:
     | "hero-tablet"
     | "colors-stack"
     | "retail-box"
@@ -11,6 +11,8 @@ interface ProductImageDisplayProps {
     | "color-orange"
     | "color-gray"
     | "color-black";
+  src?: string;
+  alt?: string;
   className?: string;
   aspectRatio?: string;
   showCaption?: boolean;
@@ -18,7 +20,9 @@ interface ProductImageDisplayProps {
 }
 
 export const ProductImageDisplay: React.FC<ProductImageDisplayProps> = ({
-  imageId,
+  imageId = "retail-box",
+  src,
+  alt,
   className = "w-full h-full",
   aspectRatio = "aspect-square",
   showCaption = false,
@@ -27,17 +31,29 @@ export const ProductImageDisplay: React.FC<ProductImageDisplayProps> = ({
     DEFAULT_PRODUCT_IMAGES.find((img) => img.id === imageId) ||
     DEFAULT_PRODUCT_IMAGES[0];
 
+  const primarySrc = src || defaultInfo.src;
+  const imageAlt = alt || defaultInfo.alt;
+
   // Static production candidate sources (assets & images directories)
   const candidateSources = [
+    primarySrc,
+    primarySrc.replace(/^\/assets\//, "/images/"),
     defaultInfo.src,
     defaultInfo.src.replace(/^\/assets\//, "/images/"),
     ...(defaultInfo.alternativeSources || []),
   ];
 
   const [sourceIndex, setSourceIndex] = useState<number>(0);
-  const [currentSrc, setCurrentSrc] = useState<string>(defaultInfo.src);
+  const [currentSrc, setCurrentSrc] = useState<string>(primarySrc);
   const [hasError, setHasError] = useState<boolean>(false);
   const [isLoading, setIsLoading] = useState<boolean>(true);
+
+  useEffect(() => {
+    setCurrentSrc(primarySrc);
+    setSourceIndex(0);
+    setHasError(false);
+    setIsLoading(true);
+  }, [imageId, primarySrc]);
 
   const handleImageError = () => {
     const nextIndex = sourceIndex + 1;
@@ -71,11 +87,12 @@ export const ProductImageDisplay: React.FC<ProductImageDisplayProps> = ({
           )}
           <img
             src={currentSrc}
-            alt={defaultInfo.alt}
+            alt={imageAlt}
             referrerPolicy="no-referrer"
             loading="lazy"
             onLoad={handleImageLoad}
             onError={handleImageError}
+            style={{ objectFit: "contain" }}
             className={`w-full h-full object-contain p-2 transition-transform duration-300 hover:scale-[1.01] ${
               isLoading ? "opacity-0" : "opacity-100"
             }`}
