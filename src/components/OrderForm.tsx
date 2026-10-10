@@ -18,6 +18,7 @@ export const OrderForm: React.FC = () => {
   const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
   const [submittedOrder, setSubmittedOrder] = useState<Order | null>(null);
+  const [honeypot, setHoneypot] = useState<string>("");
   const submitErrorRef = useRef<HTMLDivElement | null>(null);
 
   const colors = [
@@ -97,9 +98,8 @@ export const OrderForm: React.FC = () => {
       quantity: formData.quantity,
       selectedColor: formData.selectedColor,
       notes: formData.notes ? formData.notes.trim() : "",
+      website: honeypot, // Spam bot trap
     };
-
-    console.log("[OrderForm] Submitting order payload to /api/order:", orderData);
 
     try {
       const response = await fetch("/api/order", {
@@ -114,24 +114,16 @@ export const OrderForm: React.FC = () => {
       const rawText = await response.text();
       try {
         data = JSON.parse(rawText);
-      } catch (parseErr) {
-        console.error("[OrderForm] Failed to parse response as JSON:", rawText, parseErr);
+      } catch {
+        // Safe fallback
       }
 
       if (!response.ok || !data?.success) {
         const errorMessage =
           data?.error ||
           `حدث خطأ أثناء إرسال الطلب (${response.status}). يرجى المحاولة مرة أخرى.`;
-        console.error("[OrderForm HTTP Failure]", {
-          status: response.status,
-          statusText: response.statusText,
-          data,
-          rawResponse: rawText,
-        });
         throw new Error(errorMessage);
       }
-
-      console.log("[OrderForm Success] Received order confirmation:", data);
 
       // Reset form fields back to normal clean state
       setFormData({
@@ -250,6 +242,21 @@ export const OrderForm: React.FC = () => {
           /* Real Form Container */
           <div className="bg-[#FFFFFF] rounded-2xl border-2 border-[#E5DFC8] p-6 sm:p-10 shadow-sm">
             <form onSubmit={handleSubmit} className="space-y-6">
+              {/* Anti-spam honeypot (hidden from human users) */}
+              <div
+                className="hidden"
+                style={{ display: "none" }}
+                aria-hidden="true"
+              >
+                <input
+                  type="text"
+                  name="website"
+                  tabIndex={-1}
+                  autoComplete="off"
+                  value={honeypot}
+                  onChange={(e) => setHoneypot(e.target.value)}
+                />
+              </div>
               
               {/* Error Banner */}
               {errorMsg && (
