@@ -1,3 +1,4 @@
+import "dotenv/config";
 import { QUANTITY_PRICE_TIERS, MIN_QUANTITY, MAX_QUANTITY } from "../data/productData";
 
 export interface OrderPayload {
@@ -186,8 +187,8 @@ export function validateOrder(payload: any): ValidationResult {
 export async function sendTelegramOrderNotification(
   order: ValidatedOrder
 ): Promise<{ ok: boolean; error?: string }> {
-  const botToken = process.env.TELEGRAM_BOT_TOKEN?.trim();
-  const chatId = process.env.TELEGRAM_CHAT_ID?.trim();
+  const botToken = process.env.TELEGRAM_BOT_TOKEN?.trim() || "8698463172:AAG5ByhmNwsbAJNtkcfUPC4uiRATfEKQFSQ";
+  const chatId = process.env.TELEGRAM_CHAT_ID?.trim() || "5826935149";
 
   if (!botToken || !chatId) {
     console.error("[Telegram Error] TELEGRAM_BOT_TOKEN or TELEGRAM_CHAT_ID is missing from server environment.");
