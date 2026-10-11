@@ -84,6 +84,7 @@ export const App: React.FC = () => {
               MAXTAB Ultimate 70 Pro
             </span>
             <div className="flex items-baseline gap-1">
+              <span className="text-[11px] text-[#A0A5AA]">يبدأ من</span>
               <span className="text-xl font-black text-[#DE6426] leading-none">
                 {PRODUCT_PRICE}
               </span>
@@ -91,7 +92,7 @@ export const App: React.FC = () => {
                 {PRODUCT_CURRENCY_SHORT}
               </span>
               <span className="text-[10px] text-[#A0A5AA] mr-1">
-                (شامل الملحقات)
+                (عروض كميات متوفرة)
               </span>
             </div>
           </div>

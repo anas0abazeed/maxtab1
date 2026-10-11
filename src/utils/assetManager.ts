@@ -18,12 +18,12 @@ export const DEFAULT_PRODUCT_IMAGES: ProductImageItem[] = [
       "/assets/maxtab-hero.jpg",
       "/images/maxtab-hero.jpg",
     ],
-    alt: "تابلت MAXTAB Ultimate 70 Pro 5G برتقالي مع الملحقات ولوحة المفاتيح",
+    alt: "تابلت MAXTAB Ultimate 70 Pro 5G لون البرتقلي الترند مع الملحقات ولوحة المفاتيح",
     tag: "الصورة الرئيسية والملحقات",
   },
   {
     id: "colors-stack",
-    title: "خيارات الألوان: برتقالي، سكني، أسود",
+    title: "خيارات الألوان: البرتقلي الترند، سلفر، رمادي",
     description: "الألوان الثلاثة الأصلية لتابلت MAXTAB بتشطيب معدني فاخر",
     src: "/assets/maxtab-colors.jpg",
     originalUploadName: "WhatsApp Image 2026-09-10 at 9.24.05 PM.jpeg",
@@ -38,7 +38,7 @@ export const DEFAULT_PRODUCT_IMAGES: ProductImageItem[] = [
       "/assets/colors.jpg",
       "/images/colors.jpg",
     ],
-    alt: "خيارات ألوان تابلت MAXTAB الأصلية: برتقالي، سكني، أسود",
+    alt: "خيارات ألوان تابلت MAXTAB الأصلية: البرتقلي الترند، سلفر، رمادي",
     tag: "الألوان الرسمية",
   },
   {
@@ -107,10 +107,10 @@ export function getColorImageInfo(color: "برتقالي" | "سكني" | "أسو
   if (color === "برتقالي") {
     return {
       imageId: "hero-tablet" as const,
-      colorName: "برتقالي",
+      colorName: "البرتقلي الترند",
       customSrc: null,
-      badgeText: "اللون البرتقالي البرونزي المعتمد (اللون الأساسي)",
-      description: "الصورة الحقيقية المعتمدة للجهاز باللون البرتقالي مع كامل الملحقات.",
+      badgeText: "اللون المعتمد: البرتقلي الترند (اللون الأساسي)",
+      description: "الصورة الحقيقية المعتمدة للجهاز بلون البرتقلي الترند مع كامل الملحقات.",
       isAuthenticColorPhoto: true,
     };
   }
@@ -118,10 +118,10 @@ export function getColorImageInfo(color: "برتقالي" | "سكني" | "أسو
   if (color === "سكني") {
     return {
       imageId: "colors-stack" as const,
-      colorName: "سكني",
+      colorName: "سلفر",
       customSrc: null,
-      badgeText: "صورة الألوان الثلاثة الأصلية (يتوفر باللون السكني)",
-      description: "صورة واقعية تعرض الألوان الثلاثة الأصلية دون أي تعديل رقمي على لون الجهاز.",
+      badgeText: "صورة الألوان الأصلية (متوفر بلون سلفر)",
+      description: "صورة واقعية تعرض الألوان الثلاثة الأصلية للجهاز بما فيها لون سلفر دون تعديل رقمي.",
       isAuthenticColorPhoto: true,
     };
   }
@@ -129,17 +129,17 @@ export function getColorImageInfo(color: "برتقالي" | "سكني" | "أسو
   if (color === "أسود") {
     return {
       imageId: "colors-stack" as const,
-      colorName: "أسود",
+      colorName: "رمادي",
       customSrc: null,
-      badgeText: "صورة الألوان الثلاثة الأصلية (يتوفر باللون الأسود)",
-      description: "صورة واقعية تعرض الألوان الثلاثة الأصلية دون أي تعديل رقمي على لون الجهاز.",
+      badgeText: "صورة الألوان الأصلية (متوفر بلون رمادي)",
+      description: "صورة واقعية تعرض الألوان الثلاثة الأصلية للجهاز بما فيها لون رمادي دون تعديل رقمي.",
       isAuthenticColorPhoto: true,
     };
   }
 
   return {
     imageId: "hero-tablet" as const,
-    colorName: "برتقالي",
+    colorName: "البرتقلي الترند",
     customSrc: null,
     badgeText: "الصورة الرسمية المعتمدة",
     description: "تابلت MAXTAB مع الملحقات الكاملة.",

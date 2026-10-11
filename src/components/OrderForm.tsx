@@ -1,6 +1,14 @@
 import React, { useState, useRef } from "react";
-import { CheckCircle2, AlertCircle, ShoppingBag, Plus, Minus, Send, Phone, User, MapPin } from "lucide-react";
-import { PRODUCT_PRICE, PRODUCT_CURRENCY, JORDAN_GOVERNORATES } from "../data/productData";
+import { CheckCircle2, AlertCircle, ShoppingBag, Plus, Minus, Send, Phone, User, MapPin, Tag } from "lucide-react";
+import {
+  PRODUCT_PRICE,
+  PRODUCT_CURRENCY,
+  PRODUCT_CURRENCY_SHORT,
+  JORDAN_GOVERNORATES,
+  QUANTITY_PRICE_TIERS,
+  MIN_QUANTITY,
+  MAX_QUANTITY,
+} from "../data/productData";
 import { OrderFormData, Order } from "../types";
 import { getColorImageInfo } from "../utils/assetManager";
 import { ProductImageDisplay } from "./ProductImageDisplay";
@@ -18,25 +26,24 @@ export const OrderForm: React.FC = () => {
   const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
   const [submittedOrder, setSubmittedOrder] = useState<Order | null>(null);
-  const [honeypot, setHoneypot] = useState<string>("");
   const submitErrorRef = useRef<HTMLDivElement | null>(null);
 
   const colors = [
     {
       id: "برتقالي",
-      name: "برتقالي",
+      name: "البرتقلي الترند",
       badge: "اللون المميز",
       colorHex: "#DE6426",
     },
     {
       id: "سكني",
-      name: "سكني",
+      name: "سلفر",
       badge: "كلاسيكي",
       colorHex: "#8A9098",
     },
     {
       id: "أسود",
-      name: "أسود",
+      name: "رمادي",
       badge: "أنيق",
       colorHex: "#1E2022",
     },
@@ -49,8 +56,14 @@ export const OrderForm: React.FC = () => {
   const handleQuantityChange = (delta: number) => {
     setFormData((prev) => ({
       ...prev,
-      quantity: Math.max(1, prev.quantity + delta),
+      quantity: Math.min(MAX_QUANTITY, Math.max(MIN_QUANTITY, prev.quantity + delta)),
     }));
+  };
+
+  const handleSelectQuantity = (qty: number) => {
+    if (qty >= MIN_QUANTITY && qty <= MAX_QUANTITY) {
+      setFormData((prev) => ({ ...prev, quantity: qty }));
+    }
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -69,9 +82,12 @@ export const OrderForm: React.FC = () => {
       return;
     }
 
-    // 2. Validate phone number (allow optional spaces, dashes, or +962)
+    // 2. Validate phone number (normalize Arabic digits, allow optional spaces, dashes, or +962)
     const rawPhone = formData.phone.trim();
-    const cleanPhone = rawPhone.replace(/[\s\-()]/g, "");
+    const normalizedDigits = rawPhone.replace(/[٠-٩]/g, (d) =>
+      String("٠١٢٣٤٥٦٧٨٩".indexOf(d))
+    );
+    const cleanPhone = normalizedDigits.replace(/[\s\-()]/g, "");
     if (!cleanPhone || cleanPhone.length < 8) {
       const msg = "يرجى إدخال رقم هاتف فعال داخل الأردن للتواصل معك والتأكيد (مثال: 07XXXXXXXX).";
       setErrorMsg(msg);
@@ -89,6 +105,13 @@ export const OrderForm: React.FC = () => {
       return;
     }
 
+    // 4. Validate quantity (strictly between 1 and 10)
+    if (formData.quantity < MIN_QUANTITY || formData.quantity > MAX_QUANTITY) {
+      const msg = "يرجى تحديد كمية صحيحة بين 1 و 10 أجهزة فقط.";
+      setErrorMsg(msg);
+      return;
+    }
+
     setIsSubmitting(true);
 
     const orderData = {
@@ -98,7 +121,6 @@ export const OrderForm: React.FC = () => {
       quantity: formData.quantity,
       selectedColor: formData.selectedColor,
       notes: formData.notes ? formData.notes.trim() : "",
-      website: honeypot, // Spam bot trap
     };
 
     try {
@@ -155,7 +177,10 @@ export const OrderForm: React.FC = () => {
     }
   };
 
-  const totalPrice = formData.quantity * PRODUCT_PRICE;
+  const currentTier = QUANTITY_PRICE_TIERS[formData.quantity] || QUANTITY_PRICE_TIERS[1];
+  const totalPrice = currentTier.totalPrice;
+  const singleItemBaseTotal = formData.quantity * PRODUCT_PRICE;
+  const savings = singleItemBaseTotal - currentTier.totalPrice;
 
   return (
     <section id="order-form" className="bg-[#FAF8F5] py-14 md:py-24 border-b border-[#E8E4DC]">
@@ -206,11 +231,20 @@ export const OrderForm: React.FC = () => {
               </div>
               <div className="flex justify-between py-2 border-b border-[#EAE5D8]">
                 <span className="text-[#6B7280]">اللون المختار:</span>
-                <span className="font-bold text-[#DE6426]">{submittedOrder.selectedColor}</span>
+                <span className="font-bold text-[#DE6426]">
+                  {colors.find((c) => c.id === submittedOrder.selectedColor)?.name || submittedOrder.selectedColor}
+                </span>
               </div>
               <div className="flex justify-between py-2 border-b border-[#EAE5D8]">
                 <span className="text-[#6B7280]">الكمية:</span>
-                <span className="font-bold text-[#1A1D20]">{submittedOrder.quantity} جهاز</span>
+                <span className="font-bold text-[#1A1D20]">
+                  {submittedOrder.quantity} {submittedOrder.quantity === 1 ? "جهاز" : "أجهزة"}
+                  {submittedOrder.quantity > 1 && (
+                    <span className="text-xs text-[#525861] font-normal mr-1">
+                      (بمعدل {(submittedOrder.totalPrice / submittedOrder.quantity).toFixed(2).replace(/\.00$/, "")} د.أ للحبة)
+                    </span>
+                  )}
+                </span>
               </div>
               <div className="flex justify-between pt-2">
                 <span className="font-bold text-[#1A1D20]">المبلغ الإجمالي عند الاستلام:</span>
@@ -242,22 +276,6 @@ export const OrderForm: React.FC = () => {
           /* Real Form Container */
           <div className="bg-[#FFFFFF] rounded-2xl border-2 border-[#E5DFC8] p-6 sm:p-10 shadow-sm">
             <form onSubmit={handleSubmit} className="space-y-6">
-              {/* Anti-spam honeypot (hidden from human users) */}
-              <div
-                className="hidden"
-                style={{ display: "none" }}
-                aria-hidden="true"
-              >
-                <input
-                  type="text"
-                  name="website"
-                  tabIndex={-1}
-                  autoComplete="off"
-                  value={honeypot}
-                  onChange={(e) => setHoneypot(e.target.value)}
-                />
-              </div>
-              
               {/* Error Banner */}
               {errorMsg && (
                 <div className="p-4 rounded-xl bg-[#FFF1F0] border border-[#FFCCC7] flex items-start gap-3 text-red-800 text-sm font-medium">
@@ -272,7 +290,7 @@ export const OrderForm: React.FC = () => {
                   اختر اللون *
                 </label>
                 <p className="text-xs text-[#6B7280] mb-3">
-                  حدد اللون المفضل لديك (اللون البرتقالي هو اللون الأساسي المعتمد في التصوير)
+                  حدد اللون المفضل لديك (لون البرتقلي الترند هو اللون الأساسي المعتمد في التصوير)
                 </p>
 
                 <div className="grid grid-cols-3 gap-3 mb-4">
@@ -423,40 +441,105 @@ export const OrderForm: React.FC = () => {
                 </div>
               </div>
 
-              {/* 5. Quantity Counter */}
-              <div>
-                <label className="block text-base font-bold text-[#1A1D20] mb-2">
-                  الكمية *
-                </label>
-                <div className="flex items-center gap-4">
-                  <div className="inline-flex items-center bg-[#FAF8F5] border border-[#D5CDBD] rounded-xl p-1">
+              {/* 5. Quantity Counter & Tier Pricing */}
+              <div className="bg-[#FAF8F5] p-5 rounded-xl border border-[#E5DFC8]">
+                <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 mb-4">
+                  <div>
+                    <label className="block text-base font-bold text-[#1A1D20]">
+                      الكمية وعروض الأسعار *
+                    </label>
+                    <p className="text-xs text-[#6B7280]">
+                      الحد الأدنى 1 والحد الأقصى 10 أجهزة • خصم إضافي عند زيادة الكمية
+                    </p>
+                  </div>
+
+                  {/* Quantity Counter */}
+                  <div className="inline-flex items-center self-start sm:self-auto bg-[#FFFFFF] border border-[#D5CDBD] rounded-xl p-1 shadow-xs">
                     <button
                       type="button"
                       onClick={() => handleQuantityChange(-1)}
-                      disabled={formData.quantity <= 1}
-                      className="w-11 h-11 flex items-center justify-center text-[#1A1D20] hover:bg-[#EBE7DD] rounded-lg transition-colors disabled:opacity-30 disabled:cursor-not-allowed"
+                      disabled={formData.quantity <= MIN_QUANTITY}
+                      className="w-10 h-10 flex items-center justify-center text-[#1A1D20] hover:bg-[#F0EEEA] rounded-lg transition-colors disabled:opacity-30 disabled:cursor-not-allowed"
                       aria-label="إنقاص الكمية"
                     >
-                      <Minus className="w-5 h-5" />
+                      <Minus className="w-4 h-4" />
                     </button>
 
-                    <span className="w-14 text-center font-black text-xl text-[#1A1D20]">
+                    <span className="w-12 text-center font-black text-xl text-[#1A1D20]">
                       {formData.quantity}
                     </span>
 
                     <button
                       type="button"
                       onClick={() => handleQuantityChange(1)}
-                      className="w-11 h-11 flex items-center justify-center text-[#1A1D20] hover:bg-[#EBE7DD] rounded-lg transition-colors"
+                      disabled={formData.quantity >= MAX_QUANTITY}
+                      className="w-10 h-10 flex items-center justify-center text-[#1A1D20] hover:bg-[#F0EEEA] rounded-lg transition-colors disabled:opacity-30 disabled:cursor-not-allowed"
                       aria-label="زيادة الكمية"
                     >
-                      <Plus className="w-5 h-5" />
+                      <Plus className="w-4 h-4" />
                     </button>
                   </div>
+                </div>
 
-                  <span className="text-sm font-semibold text-[#525861]">
-                    ({PRODUCT_PRICE} {PRODUCT_CURRENCY} لكل جهاز شامل الملحقات)
-                  </span>
+                {/* Current Active Selection Banner */}
+                <div className="p-3.5 bg-[#FFFFFF] rounded-xl border border-[#E5DFC8] mb-4 flex flex-wrap items-center justify-between gap-3 shadow-xs">
+                  <div>
+                    <div className="flex items-baseline gap-2">
+                      <span className="font-extrabold text-[#1A1D20] text-base">
+                        {currentTier.label}:
+                      </span>
+                      <span className="font-black text-xl text-[#DE6426]">
+                        {currentTier.totalPrice} {PRODUCT_CURRENCY_SHORT}
+                      </span>
+                    </div>
+                    <span className="text-xs text-[#525861] block mt-0.5">
+                      للحبة {currentTier.avgPriceFormatted} {PRODUCT_CURRENCY_SHORT} بالمعدل (شامل الملحقات والتوصيل)
+                    </span>
+                  </div>
+
+                  {savings > 0 && (
+                    <span className="inline-flex items-center gap-1 text-xs font-bold text-[#2D6A4F] bg-[#EBF8F2] px-3 py-1.5 rounded-lg border border-[#B7E4C7]">
+                      <Tag className="w-3.5 h-3.5" />
+                      <span>توفير {savings} دينار</span>
+                    </span>
+                  )}
+                </div>
+
+                {/* Quick Selection Grid (Tiers 1 to 10) */}
+                <div className="grid grid-cols-2 sm:grid-cols-5 gap-2">
+                  {Object.values(QUANTITY_PRICE_TIERS).map((tier) => {
+                    const isSelected = formData.quantity === tier.quantity;
+                    const tierSavings = (tier.quantity * PRODUCT_PRICE) - tier.totalPrice;
+                    return (
+                      <button
+                        key={tier.quantity}
+                        type="button"
+                        onClick={() => handleSelectQuantity(tier.quantity)}
+                        className={`p-2.5 rounded-xl border text-right transition-all flex flex-col justify-between ${
+                          isSelected
+                            ? "border-[#DE6426] bg-[#FFFFFF] ring-2 ring-[#DE6426]/30 shadow-sm"
+                            : "border-[#DCD6C7] bg-[#FFFFFF]/80 hover:bg-[#FFFFFF] hover:border-[#BDB5A2]"
+                        }`}
+                      >
+                        <div className="flex items-center justify-between w-full mb-1">
+                          <span className={`text-xs font-extrabold ${isSelected ? "text-[#1A1D20]" : "text-[#2D3136]"}`}>
+                            {tier.label}
+                          </span>
+                          <span className="text-xs font-black text-[#DE6426]">
+                            {tier.totalPrice} د.أ
+                          </span>
+                        </div>
+                        <div className="flex items-center justify-between w-full text-[11px] text-[#6B7280]">
+                          <span>{tier.avgPriceFormatted} د.أ/حبة</span>
+                          {tierSavings > 0 && (
+                            <span className="text-[10px] font-bold text-[#2D6A4F] bg-[#EBF8F2] px-1 rounded">
+                              وفر {tierSavings}
+                            </span>
+                          )}
+                        </div>
+                      </button>
+                    );
+                  })}
                 </div>
               </div>
 
@@ -485,7 +568,15 @@ export const OrderForm: React.FC = () => {
                 <div>
                   <span className="text-xs text-[#6B7280] block">المجموع النهائي للدفع عند الاستلام</span>
                   <span className="text-xs font-semibold text-[#2D3136]">
-                    {formData.quantity} × {PRODUCT_PRICE} {PRODUCT_CURRENCY} ({formData.selectedColor})
+                    {currentTier.label} — لون {colors.find((c) => c.id === formData.selectedColor)?.name || formData.selectedColor}
+                  </span>
+                  <span className="block text-xs text-[#525861] mt-0.5 font-medium">
+                    معدل سعر الجهاز: {currentTier.avgPriceFormatted} {PRODUCT_CURRENCY_SHORT}
+                    {savings > 0 && (
+                      <span className="text-[#2D6A4F] font-bold mr-1.5">
+                        (إجمالي التوفير: {savings} د.أ)
+                      </span>
+                    )}
                   </span>
                 </div>
                 <div className="text-left">

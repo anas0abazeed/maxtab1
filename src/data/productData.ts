@@ -5,6 +5,34 @@ export const PRODUCT_PRICE = 88;
 export const PRODUCT_CURRENCY = "دينار أردني";
 export const PRODUCT_CURRENCY_SHORT = "د.أ";
 
+export interface QuantityTier {
+  quantity: number;
+  totalPrice: number;
+  avgPrice: number;
+  avgPriceFormatted: string;
+  label: string;
+}
+
+export const MIN_QUANTITY = 1;
+export const MAX_QUANTITY = 10;
+
+export const QUANTITY_PRICE_TIERS: Record<number, QuantityTier> = {
+  1: { quantity: 1, totalPrice: 88, avgPrice: 88, avgPriceFormatted: "88", label: "1 حبة" },
+  2: { quantity: 2, totalPrice: 170, avgPrice: 85, avgPriceFormatted: "85", label: "2 حبتان" },
+  3: { quantity: 3, totalPrice: 250, avgPrice: 83.33, avgPriceFormatted: "83.33", label: "3 حبات" },
+  4: { quantity: 4, totalPrice: 330, avgPrice: 82.5, avgPriceFormatted: "82.5", label: "4 حبات" },
+  5: { quantity: 5, totalPrice: 410, avgPrice: 82, avgPriceFormatted: "82", label: "5 حبات" },
+  6: { quantity: 6, totalPrice: 490, avgPrice: 81.67, avgPriceFormatted: "81.67", label: "6 حبات" },
+  7: { quantity: 7, totalPrice: 570, avgPrice: 81.43, avgPriceFormatted: "81.43", label: "7 حبات" },
+  8: { quantity: 8, totalPrice: 650, avgPrice: 81.25, avgPriceFormatted: "81.25", label: "8 حبات" },
+  9: { quantity: 9, totalPrice: 725, avgPrice: 80.56, avgPriceFormatted: "80.56", label: "9 حبات" },
+  10: { quantity: 10, totalPrice: 800, avgPrice: 80, avgPriceFormatted: "80", label: "10 حبات" },
+};
+
+export function getTierForQuantity(quantity: number): QuantityTier | null {
+  return QUANTITY_PRICE_TIERS[quantity] || null;
+}
+
 export const JORDAN_GOVERNORATES = [
   "عمان (العاصمة)",
   "إربد",

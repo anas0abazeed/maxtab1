@@ -34,7 +34,7 @@ export const Hero: React.FC = () => {
               <div className="flex flex-wrap items-baseline justify-between gap-3">
                 <div>
                   <span className="text-xs font-semibold text-[#666D77] block mb-0.5">
-                    السعر الرسمي للمجموعة الكاملة
+                    السعر الرسمي للمجموعة الكاملة (يبدأ من)
                   </span>
                   <div className="flex items-baseline gap-2">
                     <span className="text-3xl sm:text-4xl font-black text-[#DE6426] tracking-tight">
@@ -44,6 +44,9 @@ export const Hero: React.FC = () => {
                       {PRODUCT_CURRENCY}
                     </span>
                   </div>
+                  <span className="text-xs text-[#DE6426] font-bold block mt-1">
+                    خصومات متدرجة مميزة للكميات حتى 10 أجهزة
+                  </span>
                 </div>
 
                 <div className="text-left">
@@ -108,15 +111,15 @@ export const Hero: React.FC = () => {
                 <div className="flex items-center gap-3">
                   <span className="flex items-center gap-1 font-medium text-[#DE6426]">
                     <span className="w-3 h-3 rounded-full bg-[#DE6426] border border-[#B84A12]" />
-                    برتقالي برونزي
+                    البرتقلي الترند
                   </span>
                   <span className="flex items-center gap-1">
                     <span className="w-3 h-3 rounded-full bg-[#8E9399] border border-[#72777D]" />
-                    سكني
+                    سلفر
                   </span>
                   <span className="flex items-center gap-1">
                     <span className="w-3 h-3 rounded-full bg-[#1A1D20] border border-[#000000]" />
-                    أسود
+                    رمادي
                   </span>
                 </div>
               </div>

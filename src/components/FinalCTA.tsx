@@ -20,11 +20,7 @@ export const FinalCTA: React.FC = () => {
 
         {/* Text */}
         <p className="text-lg sm:text-xl text-[#D0D4D8] mb-8 font-medium">
-          احصل على MAXTAB Ultimate 70 Pro بسعر{" "}
-          <span className="text-[#DE6426] font-black text-2xl sm:text-3xl mx-1">
-            {PRODUCT_PRICE}
-          </span>{" "}
-          {PRODUCT_CURRENCY}.
+          احصل اليوم على شحن وتوصيل مجاني لجميع مناطق ومحافظات الأردن
         </p>
 
         {/* Button */}

@@ -37,8 +37,10 @@ export const Footer: React.FC = () => {
           
           {/* Brand Logo */}
           <div className="flex items-center gap-2">
-            <span className="text-2xl font-black tracking-wider text-white">MAX</span>
-            <span className="text-2xl font-black text-[#DE6426] tracking-wider">TAB</span>
+            <div className="flex items-center" dir="ltr">
+              <span className="text-2xl font-black tracking-wider text-white">MAX</span>
+              <span className="text-2xl font-black text-[#DE6426] tracking-wider">TAB</span>
+            </div>
             <span className="text-xs text-[#8C939E] mr-2">المملكة الأردنية الهاشمية</span>
           </div>
 

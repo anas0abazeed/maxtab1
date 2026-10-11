@@ -4,10 +4,15 @@ import { ShieldCheck, PhoneCall } from "lucide-react";
 export const Header: React.FC = () => {
   return (
     <header className="w-full bg-[#FAF8F5]/95 border-b border-[#E8E4DC] sticky top-0 z-40 backdrop-blur-sm">
+      {/* Top Fixed Marketing Announcement Bar */}
+      <div className="bg-[#1A1D20] text-[#FAF8F5] py-2 px-4 text-center text-xs sm:text-sm font-bold border-b border-[#2C3035]">
+        <span>اليوم التوصيل مجاني لجميع مناطق ومحافظات الأردن 🚚</span>
+      </div>
+
       <div className="max-w-6xl mx-auto px-4 sm:px-6 h-14 flex items-center justify-between">
         {/* Minimal Brand Area */}
         <div className="flex items-center gap-3">
-          <div className="flex items-center">
+          <div className="flex items-center" dir="ltr">
             <span className="text-xl font-black tracking-wider text-[#1A1D20]">MAX</span>
             <span className="text-xl font-black text-[#DE6426] tracking-wider">TAB</span>
           </div>
@@ -20,8 +25,8 @@ export const Header: React.FC = () => {
         <div className="flex items-center gap-3">
           <div className="flex items-center gap-1 text-xs text-[#5C626A] bg-[#F0EEEA] px-2.5 py-1 rounded-md border border-[#E2DDD2]">
             <ShieldCheck className="w-3.5 h-3.5 text-[#DE6426]" />
-            <span className="font-semibold text-[#1A1D20]">88 دينار</span>
-            <span className="hidden md:inline text-[11px]">شامل الملحقات</span>
+            <span className="font-semibold text-[#1A1D20]">يبدأ من 88 دينار</span>
+            <span className="hidden md:inline text-[11px]">عروض كميات</span>
           </div>
 
           <a
