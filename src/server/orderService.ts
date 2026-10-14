@@ -187,8 +187,8 @@ export function validateOrder(payload: any): ValidationResult {
 export async function sendTelegramOrderNotification(
   order: ValidatedOrder
 ): Promise<{ ok: boolean; error?: string }> {
-  const botToken = process.env.TELEGRAM_BOT_TOKEN?.trim() || "8698463172:AAG5ByhmNwsbAJNtkcfUPC4uiRATfEKQFSQ";
-  const chatId = process.env.TELEGRAM_CHAT_ID?.trim() || "5826935149";
+  const botToken = process.env.TELEGRAM_BOT_TOKEN?.trim();
+  const chatId = process.env.TELEGRAM_CHAT_ID?.trim();
 
   if (!botToken || !chatId) {
     console.error("[Telegram Error] TELEGRAM_BOT_TOKEN or TELEGRAM_CHAT_ID is missing from server environment.");
