@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { Shield, ChevronDown, FileText, Truck, RefreshCw } from "lucide-react";
+import { Shield, ChevronDown, Truck } from "lucide-react";
 import { POLICIES_DATA } from "../data/productData";
 
 export const PoliciesSection: React.FC = () => {
@@ -21,12 +21,6 @@ export const PoliciesSection: React.FC = () => {
       title: POLICIES_DATA.shipping.title,
       icon: <Truck className="w-5 h-5 text-[#DE6426]" />,
       content: POLICIES_DATA.shipping.content,
-    },
-    {
-      key: "returns",
-      title: POLICIES_DATA.returns.title,
-      icon: <RefreshCw className="w-5 h-5 text-[#DE6426]" />,
-      content: POLICIES_DATA.returns.content,
     },
   ];
 

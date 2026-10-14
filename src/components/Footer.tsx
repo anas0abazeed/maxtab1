@@ -59,13 +59,6 @@ export const Footer: React.FC = () => {
             >
               سياسة الشحن
             </a>
-            <span className="text-[#40464E]">•</span>
-            <a
-              href="#policies"
-              className="hover:text-[#DE6426] transition-colors py-1"
-            >
-              سياسة الاستبدال والاسترجاع
-            </a>
           </div>
 
           {/* Share Button */}
